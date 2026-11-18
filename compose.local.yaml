@@ -1,0 +1,34 @@
+
+services:
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: hub
+      POSTGRES_USER: hub
+      POSTGRES_PASSWORD: local_only
+    volumes:
+      - local_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U hub -d hub"]
+      interval: 4s
+      timeout: 3s
+      retries: 10
+  redis:
+    image: redis:7.4-bookworm
+    command: ["redis-server","--appendonly","yes","--maxmemory-policy","noeviction"]
+    volumes:
+      - local_redis:/data
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 4s
+      timeout: 3s
+      retries: 10
+  api:
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+  web:
+    ports: ["127.0.0.1:3000:3000"]
+volumes:
+  local_postgres:
+  local_redis:

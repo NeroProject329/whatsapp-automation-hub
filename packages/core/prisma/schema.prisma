@@ -1,0 +1,173 @@
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id String @id @default(uuid())
+  email String @unique
+  hash String
+  sessions Session[]
+}
+model Session {
+  id String @id
+  adminId String
+  admin Admin @relation(fields:[adminId], references:[id], onDelete:Cascade)
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+model Audit {
+  id String @id @default(uuid())
+  actor String
+  action String
+  entity String
+  entityId String
+  code String?
+  at DateTime @default(now())
+  @@index([at])
+}
+model Contact {
+  id String @id @default(uuid())
+  phone String? @unique
+  name String @default("")
+  attributes Json @default("{}")
+  tags String[] @default([])
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  consents Consent[]
+  jobs Dispatch[]
+  @@index([updatedAt])
+}
+model Consent {
+  id String @id @default(uuid())
+  contactId String
+  contact Contact @relation(fields:[contactId], references:[id])
+  purpose String @default("MARKETING")
+  source String
+  evidence String
+  grantedAt DateTime @default(now())
+  revokedAt DateTime?
+  @@index([contactId, purpose, revokedAt])
+}
+model Suppression {
+  fingerprint String @id
+  reason String
+  createdAt DateTime @default(now())
+}
+model ImportBatch {
+  id String @id @default(uuid())
+  actor String
+  filename String
+  rows Json
+  committedAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([expiresAt])
+}
+model Connection {
+  id String @id @default(uuid())
+  label String
+  provider String
+  desired String @default("OFF")
+  generation Int @default(0)
+  state String @default("OFFLINE")
+  accountPhone String? @unique
+  lastError String?
+  lastSeen DateTime?
+  qr String?
+  qrExpiresAt DateTime?
+  createdAt DateTime @default(now())
+  auth AuthEntry[]
+  campaigns Campaign[]
+  jobs Dispatch[]
+}
+model AuthEntry {
+  connectionId String
+  connection Connection @relation(fields:[connectionId], references:[id], onDelete:Cascade)
+  category String
+  key String
+  value String
+  @@id([connectionId,category,key])
+}
+model Template {
+  id String @id @default(uuid())
+  name String
+  version Int
+  body String
+  createdAt DateTime @default(now())
+  @@unique([name,version])
+}
+model Campaign {
+  id String @id @default(uuid())
+  name String
+  connectionId String
+  connection Connection @relation(fields:[connectionId], references:[id])
+  body String
+  state String @default("DRAFT")
+  audience String[]
+  scheduledAt DateTime
+  timezone String
+  windowStart Int
+  windowEnd Int
+  approval String?
+  approvedAt DateTime?
+  approvedBy String?
+  jobs Dispatch[]
+  createdAt DateTime @default(now())
+  @@index([state,scheduledAt])
+}
+model Dispatch {
+  id String @id @default(uuid())
+  uniqueKey String @unique
+  campaignId String?
+  campaign Campaign? @relation(fields:[campaignId], references:[id])
+  connectionId String
+  connection Connection @relation(fields:[connectionId], references:[id])
+  contactId String?
+  contact Contact? @relation(fields:[contactId], references:[id])
+  kind String
+  phone String?
+  address String?
+  body String
+  state String @default("PENDING")
+  dueAt DateTime @default(now())
+  reservedAt DateTime?
+  publishedAt DateTime?
+  providerId String?
+  code String?
+  submittedAt DateTime?
+  sentAt DateTime?
+  deliveredAt DateTime?
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([campaignId,contactId])
+  @@unique([connectionId,providerId])
+  @@index([state,dueAt])
+  @@index([campaignId,state])
+}
+model ChannelEvent {
+  id String @id @default(uuid())
+  connectionId String
+  key String
+  kind String
+  providerId String
+  contactId String?
+  phone String?
+  address String?
+  text String?
+  occurredAt DateTime
+  createdAt DateTime @default(now())
+  @@unique([connectionId,key])
+  @@index([connectionId,providerId])
+  @@index([kind,createdAt])
+}
+model Runtime {
+  id String @id
+  beat DateTime
+}

@@ -1,0 +1,11 @@
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/.runtime
+**/.env*
+**/*.credentials.env
+**/*.pem
+**/*.key
+.git
+**/generated

@@ -1,0 +1,36 @@
+
+name: whatsapp-hub
+services:
+  api:
+    build: {context: ., dockerfile: infra/docker/Dockerfile, target: api}
+    env_file:
+      - ${HUB_ENV_FILE:?configure o caminho para o arquivo privado}
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: 4100
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD","node","-e","fetch('http://127.0.0.1:4100/api/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+  worker:
+    build: {context: ., dockerfile: infra/docker/Dockerfile, target: worker}
+    env_file:
+      - ${HUB_ENV_FILE:?configure o caminho para o arquivo privado}
+    restart: unless-stopped
+    stop_grace_period: 45s
+    depends_on:
+      api: {condition: service_healthy}
+  web:
+    build: {context: ., dockerfile: infra/docker/Dockerfile, target: web}
+    environment:
+      API_INTERNAL_URL: http://api:4100
+    restart: unless-stopped
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD","node","-e","fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 8

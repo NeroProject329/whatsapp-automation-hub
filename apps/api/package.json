@@ -1,0 +1,30 @@
+{
+  "name": "@hub/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/main.js",
+    "dev": "tsc && node --watch dist/main.js"
+  },
+  "dependencies": {
+    "@hub/core": "workspace:*",
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/platform-express": "^11.1.0",
+    "@nestjs/swagger": "^11.2.0",
+    "cookie-parser": "^1.4.7",
+    "csv-parse": "^7.0.2",
+    "exceljs": "4.4.0",
+    "express": "^5.2.0",
+    "helmet": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.0",
+    "@types/express": "^5.0.0"
+  }
+}

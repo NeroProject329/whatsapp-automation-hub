@@ -1,0 +1,23 @@
+{
+  "name": "@hub/worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/main.js",
+    "dev": "tsc && node --watch dist/main.js"
+  },
+  "dependencies": {
+    "@hub/core": "workspace:*",
+    "baileys": "7.0.0-rc14",
+    "bullmq": "^5.70.0",
+    "pg": "^8.23.1",
+    "pino": "^10.3.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "@types/qrcode": "^1.5.6"
+  }
+}

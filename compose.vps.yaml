@@ -1,0 +1,11 @@
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports: ["80:80","443:443"]
+    depends_on:
+      web: {condition: service_healthy}
+    volumes:
+      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${HUB_CERT_DIR:?configure a pasta dos certificados}:/etc/hub-certs:ro
