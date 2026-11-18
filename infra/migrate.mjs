@@ -5,6 +5,7 @@ const c = env();
 const db = new URL(c.DATABASE_URL);
 const local =
   c.HUB_MODE === "local" &&
+  process.env.HUB_DATABASE_VIA_TUNNEL !== "true" &&
   ["127.0.0.1", "localhost", "[::1]", "postgres"].includes(db.hostname);
 if (!local && process.env.HUB_BACKUP_CONFIRMED !== "true") {
   console.error(

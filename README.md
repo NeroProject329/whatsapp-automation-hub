@@ -16,7 +16,14 @@ Abra **http://localhost:3000**. O e-mail e a senha inicial da instância local e
 
 Após alterar código, execute `pnpm db:generate` quando o modelo mudar e `pnpm build`; reinicie os processos do painel. Para a instalação Windows avulsa, o script espera `embedded-postgres@18.6.0-beta.19` em `.runtime/node_modules` e o Redis Windows extraído em `.runtime/redis`. A referência para outras estações é o Compose abaixo.
 
-Nesta estação, `node infra/launch-whatsapp-test.mjs` inicia o ambiente separado em `https://localhost:3443` com Baileys e o mesmo login. O modo local permite apenas envios de teste aos números de `TEST_NUMBERS`. Mantenha `.runtime/whatsapp-test.env` e os arquivos TLS privados. Em **Recebidas**, o painel identifica o tipo do anexo e mostra a legenda quando existir.
+Nesta estação, o painel real em `https://localhost:3443` usa a API e o worker locais com PostgreSQL e Redis do projeto `zap-api` via túneis SSH. Após reiniciar o computador, abra o PowerShell na raiz do repositório e execute:
+
+```powershell
+pwsh -NoProfile -File infra/start-railway-tunnels.ps1
+node infra/launch-whatsapp-test.mjs
+```
+
+O modo local permite apenas envios de teste aos números de `TEST_NUMBERS`. Em **Recebidas**, o painel identifica o tipo do anexo e mostra a legenda quando existir. Preserve a configuração privada em `.runtime/`, que inclui os arquivos de ambiente, TLS e SSH. A versão simulada continua em `http://localhost:3000` com seus bancos locais.
 
 ## Ambiente local com Docker Compose
 

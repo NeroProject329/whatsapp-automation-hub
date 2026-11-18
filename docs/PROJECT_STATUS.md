@@ -18,5 +18,6 @@ Blocos A–D implementados para o MVP local. O painel, a API e o worker foram va
 - Descadastro desconhecido bloqueia novas campanhas até que o canal vincule o endereço ao número. Um operador pode retomar depois que a supressão for resolvida; não há retomada automática.
 - O ambiente local HTTPS permite apenas envios individuais para o destinatário autorizado. O operador enviou uma mensagem de teste e respondeu pelo WhatsApp. A entrega e o recebimento de texto aparecem no histórico.
 - O inbox passou a classificar textos e anexos e exibir legendas. O conteúdo binário do arquivo permanece no WhatsApp.
+- O painel real, a API e o worker rodam no computador e usam os bancos do projeto `zap-api` na Railway via SSH. O schema do painel real foi copiado com backup cifrado prévio e verificação das 15 tabelas. Login, histórico, fila remota e reconexão sem QR foram confirmados após a troca.
 
-Próxima ação: liberar o acesso à Railway com TLS verificável ou rede privada, ensaiar backup e restauração no destino e operar um piloto autorizado. Consulte [pendências](BLOCKERS.md) e a [matriz dos requisitos](ROADMAP.md).
+Próxima ação: ensaiar a recuperação no destino e operar um piloto autorizado. Consulte [pendências](BLOCKERS.md) e a [matriz dos requisitos](ROADMAP.md).
