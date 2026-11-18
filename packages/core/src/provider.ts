@@ -1,4 +1,6 @@
 export type Receipt = "SENT" | "DELIVERED" | "READ";
+export type InboundContent =
+  "TEXT" | "IMAGE" | "VIDEO" | "AUDIO" | "DOCUMENT" | "STICKER";
 export type ChannelUpdate =
   | {
       kind: "state";
@@ -12,7 +14,8 @@ export type ChannelUpdate =
       id: string;
       address: string;
       phone: string | null;
-      text: string;
+      contentType?: InboundContent;
+      text?: string;
       at: Date;
     }
   | { kind: "receipt"; id: string; receipt: Receipt; at: Date };

@@ -6,6 +6,7 @@ import makeWASocket, {
   isLidUser,
   isPnUser,
   jidNormalizedUser,
+  normalizeMessageContent,
   proto,
 } from "baileys";
 import type {
@@ -14,6 +15,7 @@ import type {
   SignalDataTypeMap,
   WAMessageKey,
   WASocket,
+  WAMessageContent,
 } from "baileys";
 import pino from "pino";
 import { decrypt, encrypt, phone, transact, log } from "@hub/core";
@@ -23,7 +25,34 @@ import type {
   MessagingProvider,
   SubmitText,
   Receipt,
+  InboundContent,
 } from "@hub/core";
+
+export function classifyInbound(
+  message: WAMessageContent,
+): { contentType: InboundContent; text?: string } | undefined {
+  const content = normalizeMessageContent(message);
+  if (!content) return;
+  const text = content.conversation ?? content.extendedTextMessage?.text;
+  if (text) return { contentType: "TEXT", text };
+  if (content.imageMessage)
+    return {
+      contentType: "IMAGE",
+      text: content.imageMessage.caption ?? undefined,
+    };
+  if (content.videoMessage)
+    return {
+      contentType: "VIDEO",
+      text: content.videoMessage.caption ?? undefined,
+    };
+  if (content.audioMessage) return { contentType: "AUDIO" };
+  if (content.documentMessage)
+    return {
+      contentType: "DOCUMENT",
+      text: content.documentMessage.caption ?? undefined,
+    };
+  if (content.stickerMessage) return { contentType: "STICKER" };
+}
 
 export class BaileysProvider implements MessagingProvider {
   private socket?: WASocket;
@@ -240,16 +269,16 @@ export class BaileysProvider implements MessagingProvider {
           if (!m.key.id || !m.message) continue;
           const from = await this.inbound(m.key);
           if (!from) continue;
-          const text =
-            m.message.conversation ?? m.message.extendedTextMessage?.text;
-          if (!text) continue;
+          const content = classifyInbound(m.message);
+          if (!content) continue;
           const at = new Date(Number(m.messageTimestamp) * 1000);
           if (!Number.isFinite(+at)) continue;
           await sink({
             kind: "inbound",
             id: m.key.id,
             ...from,
-            text: text.slice(0, 4096),
+            contentType: content.contentType,
+            text: content.text?.slice(0, 4096),
             at,
           });
         }

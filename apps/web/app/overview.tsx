@@ -352,6 +352,14 @@ export function Logs() {
     </>
   );
 }
+const mediaLabels: Record<string, string> = {
+  IMAGE: "Imagem recebida",
+  VIDEO: "Vídeo recebido",
+  AUDIO: "Áudio recebido",
+  DOCUMENT: "Documento recebido",
+  STICKER: "Figurinha recebida",
+};
+
 export function InboxView() {
   const [p, set] = useState(1);
   const { value, error } = useData<
@@ -361,6 +369,7 @@ export function InboxView() {
       connectionId: string;
       contactId?: string;
       text?: string;
+      contentType?: string | null;
       occurredAt: string;
     }[]
   >("events?page=" + p, 4000);
@@ -389,7 +398,15 @@ export function InboxView() {
                     "—"
                   )}
                 </td>
-                <td className="message-cell">{r.text ?? "—"}</td>
+                <td className="message-cell">
+                  {r.contentType && mediaLabels[r.contentType] && (
+                    <strong>{mediaLabels[r.contentType]}</strong>
+                  )}
+                  {r.text && <div>{r.text}</div>}
+                  {!r.text &&
+                    !(r.contentType && mediaLabels[r.contentType]) &&
+                    "—"}
+                </td>
               </tr>
             ))}
           </Table>

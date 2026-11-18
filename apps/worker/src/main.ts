@@ -7,6 +7,7 @@ import {
   FakeProvider,
   PrismaClient,
   audit,
+  canSend,
   env,
   fingerprint,
   log,
@@ -181,8 +182,7 @@ async function runJob(id: string) {
       d.connection.provider !== cfg.PROVIDER
     )
       return;
-    if (d.connection.provider === "baileys" && cfg.REAL_SEND_ENABLED !== "true")
-      return;
+    if (!canSend(cfg, d.connection.provider, d.kind)) return;
     const c = d.campaign;
     if (
       c &&
@@ -407,6 +407,9 @@ async function sweep() {
     where: {
       state: "PENDING",
       dueAt: { lte: new Date() },
+      ...(cfg.PROVIDER === "baileys" && cfg.HUB_MODE === "local"
+        ? { kind: "TEST" }
+        : {}),
       connection: { desired: "ON", state: "READY", provider: cfg.PROVIDER },
       OR: [
         { publishedAt: null },

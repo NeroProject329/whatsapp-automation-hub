@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   allowed,
   audit,
+  canSend,
   digest,
   fingerprint,
   marketingFooter,
@@ -109,11 +110,13 @@ async function preview(
   const token = digest(JSON.stringify({ id: c.id, counts, eligible, errors }));
   return { counts, eligible, errors, token };
 }
-function realGate(provider: string) {
-  if (provider === "baileys" && cfg.REAL_SEND_ENABLED !== "true")
+function realGate(provider: string, kind = "MARKETING") {
+  if (!canSend(cfg, provider, kind))
     conflict(
       "REAL_SEND_DISABLED",
-      "Envios reais estão desabilitados neste ambiente.",
+      cfg.HUB_MODE === "local" && kind === "MARKETING"
+        ? "Este ambiente libera apenas envios individuais de teste."
+        : "Envios reais estão desabilitados neste ambiente.",
     );
 }
 export async function saveTemplate(value: unknown, actor: string) {
@@ -337,7 +340,7 @@ export async function testSend(cid: string, value: unknown, actor: string) {
       include: { connection: true },
     });
     if (!c) missing();
-    realGate(c.connection.provider);
+    realGate(c.connection.provider, "TEST");
     if (c.connection.state !== "READY")
       conflict("CONNECTION_UNAVAILABLE", "O remetente não está pronto.");
     if (

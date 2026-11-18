@@ -7,6 +7,7 @@ import { join, resolve } from "node:path";
 import { chromium } from "@playwright/test";
 import { PrismaClient, env } from "../packages/core/dist/index.js";
 import { event } from "../apps/worker/dist/events.js";
+import { classifyInbound } from "../apps/worker/dist/baileys.js";
 import { createServer } from "node:net";
 import ExcelJS from "../apps/api/node_modules/exceljs/excel.js";
 
@@ -179,15 +180,13 @@ try {
   );
   await page.getByRole("link", { name: "Contatos", exact: true }).click();
   await page.getByRole("button", { name: "Importar", exact: true }).click();
-  await page
-    .getByLabel("Planilha de contatos")
-    .setInputFiles({
-      name: "contatos.csv",
-      mimeType: "text/csv",
-      buffer: Buffer.from(
-        "PHONE;NOME\n+12025550133;Aline\n+1 202 555 0133;Duplicada\nabc;Inválida\n+12025550134;Bia",
-      ),
-    });
+  await page.getByLabel("Planilha de contatos").setInputFiles({
+    name: "contatos.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(
+      "PHONE;NOME\n+12025550133;Aline\n+1 202 555 0133;Duplicada\nabc;Inválida\n+12025550134;Bia",
+    ),
+  });
   await page.getByRole("button", { name: "Gerar prévia" }).click();
   await page.getByText("2 de 4 registros disponíveis para importar").waitFor();
   await page.getByRole("button", { name: "Confirmar importação" }).click();
@@ -330,6 +329,23 @@ try {
   });
   assert.equal(await db.dispatch.count({ where: { kind: "OPT_OUT" } }), 1);
   assert.equal(await db.channelEvent.count({ where: { kind: "INBOUND" } }), 2);
+  const image = classifyInbound({ imageMessage: {} });
+  assert.deepEqual(image, { contentType: "IMAGE", text: undefined });
+  await event(db, cfg, conn.id, binding.generation, {
+    ...evt,
+    ...image,
+    id: "fixture-image",
+    phone: b.phone,
+    address: "12025550134@s.whatsapp.net",
+    text: "SAIR",
+  });
+  assert.equal(await db.dispatch.count({ where: { kind: "OPT_OUT" } }), 1);
+  assert.equal(
+    (await get("events")).some((entry) => entry.contentType === "IMAGE"),
+    true,
+  );
+  await page.goto(origin + "/inbox");
+  await page.getByText("Imagem recebida", { exact: true }).waitFor();
   assert.equal(
     (await db.consent.findFirst({ where: { contactId: a.id } }))
       .revokedAt instanceof Date,

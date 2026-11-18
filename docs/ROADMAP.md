@@ -8,7 +8,7 @@ Status “local” indica código executado com FakeProvider/infraestrutura isol
 | 001 | P0 | Login, sessão opaca revogável, CSRF por origem e rotas administrativas protegidas. |
 | 002 | P0 | Cadastro de remetente e escolha explícita na campanha. |
 | 003 | P0 | Polling, estado, atividade, QR temporário e diagnóstico por conexão. |
-| 004 | P0 | AuthState cifrado no Prisma, credenciais e chaves Signal; restauração do pareamento real a validar. |
+| 004 | P0 | AuthState cifrado no Prisma, credenciais e chaves Signal. Reconexão real após reinício confirmada. |
 | 005 | P0 | CSV/XLSX, posição das colunas, relatório por linha, prévia e confirmação. |
 | 006 | P0 | Validação canônica E.164 com libphonenumber. |
 | 007 | P0 | Índice único e deduplicação na prévia e no commit. |
@@ -20,8 +20,8 @@ Status “local” indica código executado com FakeProvider/infraestrutura isol
 | 013 | P0 | Pausa, retomada, cancelamento durável e rechecagem do worker. |
 | 014 | P0 | Dispatch no PostgreSQL como outbox; BullMQ e republicação. |
 | 015 | P0 | Uma tarefa por campanha/contato e chaves de deduplicação. |
-| 016 | P0 | Aceite e recibos separados; sem entrega presumida. Mapeamento real a validar no piloto. |
-| 017 | P0 | Eventos de socket normalizados e deduplicados; recepção real a validar. |
+| 016 | P0 | Aceite e recibos separados. Entrega real confirmada no envio individual local. |
+| 017 | P0 | Eventos de socket normalizados e deduplicados. Recepção real de texto confirmada. |
 | 018 | P0 | SAIR, PARAR, CANCELAR e DESCADASTRAR em texto direto. |
 | 019 | P0 | Supressão por número, revogação e bloqueio de pendências; retenção conservadora de LID sem número. |
 | 020 | P0 | Confirmação única persistente; teste de concorrência/replay. |
@@ -33,6 +33,6 @@ Status “local” indica código executado com FakeProvider/infraestrutura isol
 | 026 | P1 | Etiquetas, atributos e filtros. Listas salvas e segmentações compostas pendentes. |
 | 027 | P1 | Modelos versionados e seleção da versão em campanha. |
 | 028 | P1 | Conexões múltiplas no modelo e seleção explícita. Operação simultânea real a validar. |
-| 029 | P1 | Anexos fora do MVP de texto. |
+| 029 | P1 | Recebimento com tipo e legenda no histórico. Visualização do arquivo e envio de anexos pendentes. |
 | 030 | P2 | Fluxos condicionais fora do MVP. |
 | 031 | P2 | Um administrador inicial. Equipe, MFA e RBAC granular pendentes. |

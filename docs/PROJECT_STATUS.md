@@ -6,9 +6,9 @@ Blocos A–D implementados para o MVP local. O painel, a API e o worker foram va
 | Bloco | Fases | Entrega | Validação e correções | Status |
 | --- | --- | --- | --- | --- |
 | A | 0–3 | Monorepo, migração, login, contatos, consentimento, filtros, supressão e importação | Migração no schema local e schemas E2E; login, falha sem sessão, CSRF, CSV e XLSX (dedupe, colunas remapeadas e fórmula rejeitada) | Aprovado localmente |
-| B | 4–6 | Interface de provedor, Fake e Baileys 7.0.0-rc14, chaves e QR privados, editor, modelos e campanhas | Contrato Fake, preview e aprovação, allowlist, disparo simulado e edição invalida aprovação. Baileys compila e carrega, sem sessão real | Aprovado com ressalva de canal |
+| B | 4–6 | Interface de provedor, Fake e Baileys 7.0.0-rc14, chaves e QR privados, editor, modelos e campanhas | Contrato Fake, preview e aprovação, allowlist e invalidação de aprovação por edição. No Baileys local, foram confirmados QR, envio individual, recibo de entrega e reconexão sem outro QR | Envio individual validado |
 | C | 7–9 | PostgreSQL/BullMQ, estados, opt-out, dashboard e histórico | Worker reiniciado sem perder envio; reserva interrompida vira UNKNOWN; ordem de recibos, pausa/cancelamento, replay, supressão e LID resolvido; revisão desktop e mobile | Aprovado localmente |
-| D | 10–11 | Hardening de sessão e isolamento, manifests de VPS, scripts de backup/restore, documentação | Lint, TypeScript, build de produção, 6 testes unitários, E2E em Edge com serviços reais locais. Auditoria de dependências de produção sem vulnerabilidades conhecidas na consulta. Bash validado por sintaxe; Compose Linux e teste de restauração ficam para homologação | Aprovado localmente, produção pendente |
+| D | 10–11 | Hardening de sessão e isolamento, manifests de VPS, scripts de backup/restore, documentação | Lint, TypeScript, build de produção, 6 testes unitários e E2E. Backup cifrado dos dois schemas locais restaurado em um banco exclusivo com 14 contagens conferidas. Bash validado por sintaxe. Compose Linux e restore no destino final ficam para homologação | Aprovado localmente, produção pendente |
 
 ## Decisões vigentes
 
@@ -16,6 +16,7 @@ Blocos A–D implementados para o MVP local. O painel, a API e o worker foram va
 - O worker reserva de forma durável e inicia a chamada do provedor sob uma última verificação serializada. Não espera a resposta do canal com o lock. Operações já em trânsito não podem ser desfeitas.
 - Estado incerto nunca volta a pendente por timeout de envio. Recibos guardam fatos independentes do status de campanha.
 - Descadastro desconhecido bloqueia novas campanhas até que o canal vincule o endereço ao número. Um operador pode retomar depois que a supressão for resolvida; não há retomada automática.
-- Conexões reais, envios reais, push remoto e publicação não foram executados.
+- O ambiente local HTTPS permite apenas envios individuais para o destinatário autorizado. O operador enviou uma mensagem de teste e respondeu pelo WhatsApp. A entrega e o recebimento de texto aparecem no histórico.
+- O inbox passou a classificar textos e anexos e exibir legendas. O conteúdo binário do arquivo permanece no WhatsApp.
 
-Próxima ação: validar as conexões Railway com transporte confiável, ensaiar backup/restore e vincular um aparelho autorizado em homologação. Consulte [pendências](BLOCKERS.md) e a [matriz dos requisitos](ROADMAP.md).
+Próxima ação: liberar o acesso à Railway com TLS verificável ou rede privada, ensaiar backup e restauração no destino e operar um piloto autorizado. Consulte [pendências](BLOCKERS.md) e a [matriz dos requisitos](ROADMAP.md).

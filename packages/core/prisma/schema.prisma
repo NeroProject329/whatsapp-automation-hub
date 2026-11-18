@@ -151,6 +151,15 @@ model Dispatch {
   @@index([state,dueAt])
   @@index([campaignId,state])
 }
+enum InboundContent {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  STICKER
+}
+
 model ChannelEvent {
   id String @id @default(uuid())
   connectionId String
@@ -161,6 +170,7 @@ model ChannelEvent {
   phone String?
   address String?
   text String?
+  contentType InboundContent?
   occurredAt DateTime
   createdAt DateTime @default(now())
   @@unique([connectionId,key])

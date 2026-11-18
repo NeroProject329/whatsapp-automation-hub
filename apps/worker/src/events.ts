@@ -153,6 +153,7 @@ export async function event(
         address: e.address,
         contactId: contact?.id,
         text: e.text,
+        contentType: e.contentType ?? (e.text ? "TEXT" : undefined),
       },
       skipDuplicates: true,
     });
@@ -185,7 +186,12 @@ export async function event(
           });
       }
     }
-    if (!isOptOut(e.text)) return;
+    if (
+      !e.text ||
+      (e.contentType && e.contentType !== "TEXT") ||
+      !isOptOut(e.text)
+    )
+      return;
     const suppressed = e.phone
       ? await suppress(tx, cfg.APP_ENCRYPTION_KEY, e.phone, "INBOUND_OPT_OUT")
       : null;

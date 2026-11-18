@@ -72,11 +72,26 @@ export function env() {
     throw new Error(
       "PUBLIC_ORIGIN deve ser uma origem válida; produção exige HTTPS.",
     );
-  if (c.PROVIDER === "baileys" && c.HUB_MODE !== "production")
-    throw new Error("Baileys exige ambiente HTTPS de produção ou homologação.");
+  const loopback = ["localhost", "127.0.0.1", "[::1]"];
+  if (
+    c.PROVIDER === "baileys" &&
+    c.HUB_MODE === "local" &&
+    (origin.protocol !== "https:" ||
+      ![origin.hostname, db.hostname, redis.hostname, c.API_HOST].every(
+        (host) => loopback.includes(host),
+      ))
+  )
+    throw new Error("Baileys local exige HTTPS, API e bancos no loopback.");
   return c;
 }
 export type Config = ReturnType<typeof env>;
+export function canSend(config: Config, provider: string, kind: string) {
+  if (provider !== "baileys") return true;
+  return (
+    config.REAL_SEND_ENABLED === "true" &&
+    (config.HUB_MODE !== "local" || kind === "TEST")
+  );
+}
 export const queueName = "dispatch";
 export function redis(c: Config, worker = false) {
   const url = new URL(c.REDIS_URL);

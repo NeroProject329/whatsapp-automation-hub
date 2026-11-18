@@ -297,6 +297,7 @@ class AdminController {
         kind: true,
         contactId: true,
         text: true,
+        contentType: true,
         occurredAt: true,
         createdAt: true,
       },
@@ -361,21 +362,19 @@ class SafeErrors {
         : {};
     if (code >= 500) log("api_error", obj.code ?? "INTERNAL");
     if (!res.headersSent)
-      res
-        .status(code)
-        .json({
-          error: {
-            code: obj.code ?? (code === 404 ? "NOT_FOUND" : "REQUEST_ERROR"),
-            message:
-              obj.code && typeof obj.message === "string"
-                ? obj.message
-                : code >= 500
-                  ? "Não foi possível concluir."
-                  : "Solicitação inválida.",
-            details: obj.details,
-            requestId: res.locals.requestId,
-          },
-        });
+      res.status(code).json({
+        error: {
+          code: obj.code ?? (code === 404 ? "NOT_FOUND" : "REQUEST_ERROR"),
+          message:
+            obj.code && typeof obj.message === "string"
+              ? obj.message
+              : code >= 500
+                ? "Não foi possível concluir."
+                : "Solicitação inválida.",
+          details: obj.details,
+          requestId: res.locals.requestId,
+        },
+      });
   }
 }
 async function main() {
@@ -424,14 +423,12 @@ async function main() {
         } as never);
         res.json(doc);
       } catch {
-        res
-          .status(401)
-          .json({
-            error: {
-              code: "SESSION_REQUIRED",
-              message: "Entre para continuar.",
-            },
-          });
+        res.status(401).json({
+          error: {
+            code: "SESSION_REQUIRED",
+            message: "Entre para continuar.",
+          },
+        });
       }
     });
   await app.listen(cfg.API_PORT, cfg.API_HOST);
